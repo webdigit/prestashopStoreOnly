@@ -38,7 +38,8 @@ class WebdigitStoreOnly extends Module {
 		if (Shop::isFeatureActive ()) // Si le multiboutique est activé ou non
 			Shop::setContext ( Shop::CONTEXT_ALL ); // Modifie le contexte pour appliquer les changements qui suivent à toutes les boutiques existantes plus qu'à la seule boutique actuellement utilisée.
 		
-		if (! parent::install() || ! Configuration::updateValue ( 'MYMODULE_NAME', 'WEBDIGIT_STORE_ONLY' ))
+		// CRÉATION ONGLET : installation des différentes méthodes pour la création de l'onglet
+		if (! parent::install() || ! $this->alterTable( 'add' ) || ! $this->registerHook( 'actionAdminControllerSetMedia' ) || ! $this->registerHook( 'actionProductUpdate' ) || ! $this->registerHook( 'displayAdminProductsExtra' ) || ! Configuration::updateValue( 'MYMODULE_NAME', 'WEBDIGIT_STORE_ONLY' ) )
 			return false;
 		
 		return true;
@@ -47,9 +48,35 @@ class WebdigitStoreOnly extends Module {
 	// Méthode pour la désinstallation du module
 	
 	public function uninstall() {
-		return parent::uninstall() && Configuration::deleteByName ( 'WEBDIGIT_STORE_ONLY' );
+		return parent::uninstall() && $this->alterTable( 'remove' ) && Configuration::deleteByName ( 'WEBDIGIT_STORE_ONLY' );
+		
 	}
 	
+	// Création de la méthode alterTable pour gérer l'ajout ou la suppression
+	
+	public function alterTable($method) {
+		switch ($method) {
+			case 'add':
+				$sql = 'ALTER TABLE ' . _DB_PREFIX_ . 'product ADD `store_only` TINYINT(1) unsigned NOT NULL DEFAULT \'0\''; // Ajoute la colonne 'store_only' dans la table 'product_lang' à l'installation du module
+				break;
+			
+			case 'remove':
+				$sql = ' ALTER TABLE ' . _DB_PREFIX_ . 'product DROP COLUMN `store_only`'; // Supprime la colonne 'store_only' dans la table 'product_lang' à la désinstallation du module
+				break;
+		}
+		
+		// Exécution du sQL 
+		if(! Db::getInstance()->Execute($sql))
+			return false;
+		return true;
+	}
+	
+	// TEST CRÉATION ONGLET
+	public function hookDisplayAdminProductsExtra($params){
+		if (Validate::isLoadedObject($product = new Product((int)Tools::getValue( 'id_product' )))) {
+			return $this->display(__FILE__, 'webdigitstoreonly.tpl');
+		}
+	}
 	
 	
 	
