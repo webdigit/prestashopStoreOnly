@@ -57,15 +57,6 @@ class WebdigitStoreOnly extends Module {
 	public function uninstall() {
 		return parent::uninstall() && $this->alterTable( 'remove' ) && Configuration::deleteByName ( 'WEBDIGIT_STORE_ONLY' ); 
 	}
-	
-	public function getContent(){
-		
-		
-	}
-	
-	public function displayForm(){
-		
-	}
 		
 	// Création de la méthode alterTable pour gérer l'ajout ou la suppression
 	
@@ -98,6 +89,7 @@ class WebdigitStoreOnly extends Module {
 			$this->context->controller->addCss ($this->_path . 'views/css/wdstoreonly.css', 'all');
 			$this->context->controller->addJs ($this->_path . 'views/js/wdstoreonly.js', 'all');
 		}
+
 	}
 	
 	public function hookActionAdminControllerSetMedia($params){
@@ -116,12 +108,15 @@ class WebdigitStoreOnly extends Module {
 			if(!$value){
 				$value = 0;
 			}
+			
 			Db::getInstance()->update('product', array('store_only'=>$value), 'id_product = '.$id_product);
+			
 		}
 		
 		$checked = '';
 		if($value || $value == 1){
 			$checked = 'checked="checked"';
+			
 		}
 		
 		$this->smarty->assign ( array (
