@@ -111,6 +111,16 @@ class WebdigitStoreOnly extends Module {
 			
 			Db::getInstance()->update('product', array('store_only'=>$value), 'id_product = '.$id_product);
 			
+		}else {
+			$id_product = $_GET['id_product'];
+			$sql = 'SELECT store_only FROM '._DB_PREFIX_.'product WHERE id_product = '.$id_product;
+			if (!$result = Db::getInstance()->getRow($sql)){
+				die('Erreur etc.');
+			}else {
+				$value = $result['store_only'];
+			}
+			//$o_product = new Product($id_product);
+			//var_dump($o_product);
 		}
 		
 		$checked = '';
