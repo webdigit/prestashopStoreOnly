@@ -1,17 +1,21 @@
 $(function(){
 	
-	//Cache le bouton 'Ajouter au panier' sur la page d'accueil
-	//var buttonContainer = $('.button-container').closest('.right-block');
-	//buttonContainer.find('a span:first').css('visibility','hidden');
-	var buttonContainer = $('.right-block').find('.button-container');
-	buttonContainer.find('a:first').remove();
+	if($('#buy_block').length > 0){
+		var wd_product_id =  $('#product_page_product_id').val();
+		if(storeOnly[wd_product_id] == '1'){
+			$('#add_to_cart').hide();
+			$('#add_to_cart').after('<p class="btn-reserve">Article uniquement disponible en magasin. Pour réserver l\'article, il faut téléphoner au magasin.</p>');
+		}
+	}
 	
-	
-	//Cache le bouton 'Ajouter au panier' sur la page article
-	//$('#add_to_cart').css('visibility','hidden');
-	$('#add_to_cart').remove();
-	
-	//Ajout du message pour la réservation
-	$('#short_description_content p').after('<p style="font-size:18px;text-align:center;border:1px solid black;line-height:25px;color:black;">Article uniquement disponible en magasin. Pour réserver l\'article, il faut téléphoner au magasin.</p>');
+	if($('.button.ajax_add_to_cart_button').length > 0){
+		$.each($('.button.ajax_add_to_cart_button'),function(i,e){
+			var wd_product_id =  $(e).data('id-product');
+			if(storeOnly[wd_product_id] == '1'){
+				$(e).hide();
+				$(e).after('<a class="button btn-reserve"><span>Sur réservation</span></a>');
+			}
+		});	
+	}
 	
 });

@@ -4,7 +4,7 @@ if (! defined ( '_PS_VERSION_' ))
 
 class WebdigitStoreOnly extends Module {
 	
-	
+	private $storeOnly;
 	// Méthode de construction du module webdigitstoreonly
 	
 	public function __construct() {
@@ -23,11 +23,9 @@ class WebdigitStoreOnly extends Module {
 		
 		$this->displayName = $this->l ( 'Products Store Only' );
 		$this->description = $this->l ( 'Give possibility to sell a selected product only through your store (click and mortar)' );
-		
 		$this->confirmUninstall = $this->l ( 'Are you sure you want to uninstall?' );
 		
 		// Gestion des inputs du formulaire
-		
 		if (! Configuration::get ( 'WEBDIGIT_STORE_ONLY' ))
 			$this->warning = $this->l ( 'No name provided' );
 	}
@@ -39,7 +37,7 @@ class WebdigitStoreOnly extends Module {
 		if (Shop::isFeatureActive ()) // Si le multiboutique est activé ou non
 			Shop::setContext ( Shop::CONTEXT_ALL ); // Modifie le contexte pour appliquer les changements qui suivent à toutes les boutiques existantes plus qu'� la seule boutique actuellement utilis�e.
 		
-		// CR�ATION ONGLET : installation des différentes méthodes pour la création de l'onglet
+		// CREATION ONGLET : installation des différentes méthodes pour la création de l'onglet
 		if (! parent::install() || 
 				! $this->alterTable ( 'add' ) || 
 				! $this->registerHook ( 'actionAdminControllerSetMedia' ) || 
@@ -53,13 +51,11 @@ class WebdigitStoreOnly extends Module {
 	}
 	
 	// Méthode pour la désinstallation du module
-	
 	public function uninstall() {
 		return parent::uninstall() && $this->alterTable( 'remove' ) && Configuration::deleteByName ( 'WEBDIGIT_STORE_ONLY' ); 
 	}
 		
 	// Création de la méthode alterTable pour gérer l'ajout ou la suppression
-	
 	public function alterTable($method) {
 		switch ($method) {
 			case 'add':
@@ -70,7 +66,6 @@ class WebdigitStoreOnly extends Module {
 				$sql = ' ALTER TABLE ' . _DB_PREFIX_ . 'product DROP COLUMN `store_only`'; // Supprime la colonne 'store_only' dans la table 'product_lang' à la désinstallation du module
 				break;
 		}
-		
 		// Exécution du sQL 
 		if(! Db::getInstance()->Execute($sql))
 			return false;
@@ -88,14 +83,30 @@ class WebdigitStoreOnly extends Module {
 		if (isset( $_controller->php_self ) && in_array ($_controller->php_self, $allowed_controllers)){
 			$this->context->controller->addCss ($this->_path . 'views/css/wdstoreonly.css', 'all');
 			$this->context->controller->addJs ($this->_path . 'views/js/wdstoreonly.js', 'all');
+		}	
+		$sql = "SELECT id_product, store_only FROM "._DB_PREFIX_."product WHERE active = '1';";
+		
+		if($result = Db::getInstance()->ExecuteS($sql)){
+			$jsReturn = ''; 
+			$jsReturn .= '<script type="text/javascript">';
+			$jsReturn .= 'var storeOnly = [];';
+			foreach ($result as $row){
+				/*
+				 * storeOnly['1']=1
+				 * storeOnly['2']=0
+				 * storeOnly['3']=1
+				 */
+				$jsReturn .= "storeOnly['".$row['id_product']."']='".$row['store_only']."';";
+			}
+			
+			$jsReturn .= '</script>';			
+			return $jsReturn;
 		}
-
 	}
 	
 	public function hookActionAdminControllerSetMedia($params){
 	
-			$this->context->controller->addJs($this->_path.'views/js/wdstoreonly_admin.js');
-		
+		$this->context->controller->addJs($this->_path.'views/js/wdstoreonly_admin.js');	
 	}
 	
 	
@@ -107,8 +118,7 @@ class WebdigitStoreOnly extends Module {
 			
 			if(!$value){
 				$value = 0;
-			}
-			
+			}			
 			Db::getInstance()->update('product', array('store_only'=>$value), 'id_product = '.$id_product);
 			
 		}else {
@@ -119,26 +129,16 @@ class WebdigitStoreOnly extends Module {
 			}else {
 				$value = $result['store_only'];
 			}
-			//$o_product = new Product($id_product);
-			//var_dump($o_product);
 		}
-		
+
 		$checked = '';
 		if($value || $value == 1){
 			$checked = 'checked="checked"';
-			
 		}
 		
-		$this->smarty->assign ( array (
+		$this->smarty->assign (array(
 				'checked' => $checked
-		) );
+		));
 		return $this->display(__FILE__, 'wdstoreonly.tpl');
-		
-
-	}
-	
-
-	
-	
-	
+	}	
 }
