@@ -1,10 +1,10 @@
 <?php
+//session_start();
 if (! defined ( '_PS_VERSION_' ))
 	exit ();
 
 class WebdigitStoreOnly extends Module {
 	
-	private $storeOnly;
 	// Méthode de construction du module webdigitstoreonly
 	
 	public function __construct() {
@@ -39,7 +39,7 @@ class WebdigitStoreOnly extends Module {
 		
 		// CREATION ONGLET : installation des différentes méthodes pour la création de l'onglet
 		if (! parent::install() || 
-				! $this->alterTable ( 'add' ) || 
+				//! $this->alterTable ( 'add' ) || 
 				! $this->registerHook ( 'actionAdminControllerSetMedia' ) || 
 				! $this->registerHook ( 'displayHeader' ) ||
 				! $this->registerHook ( 'actionProductUpdate' ) || 
@@ -84,23 +84,57 @@ class WebdigitStoreOnly extends Module {
 			$this->context->controller->addCss ($this->_path . 'views/css/wdstoreonly.css', 'all');
 			$this->context->controller->addJs ($this->_path . 'views/js/wdstoreonly.js', 'all');
 		}	
+		
 		$sql = "SELECT id_product, store_only FROM "._DB_PREFIX_."product WHERE active = '1';";
 		
+	
+		
+		//$result = null;
+		
+		//$product = new Product($row['id_product']);
+		//$link = new Link();
+		//$url = $link->getProductLink($product);
+		
+		
+		//var_dump($test);
+		//var_dump($test1);
+		
+		/*if($_SESSION['storeOnly'] != null){
+			//var_dump('ici');
+			$result = $_SESSION['storeOnly'];
+		}else{
+			//var_dump('l�');				
+			$result = Db::getInstance()->ExecuteS($sql);
+			$_SESSION['storeOnly'] = $result;
+		}*/
+		
+		//if($result != null){
 		if($result = Db::getInstance()->ExecuteS($sql)){
-			$jsReturn = ''; 
+			$jsReturn = '';
 			$jsReturn .= '<script type="text/javascript">';
-			$jsReturn .= 'var storeOnly = [];';
+			$jsReturn .= 'var storeOnly = [];var productLink = [];';
+			//$jsReturn .= 'var storeOnly = [];';
+
 			foreach ($result as $row){
 				/*
 				 * storeOnly['1']=1
 				 * storeOnly['2']=0
 				 * storeOnly['3']=1
 				 */
+				//$product = new Product($row['id_product']);
+				//$link = new Link();
+				//$url = $link->getProductLink($product);
+				//http://stackoverflow.com/questions/22633395/get-product-url-using-prestashop-api?answertab=active#tab-top
+				$link = _PS_BASE_URL_.'/index.php?controller=product&id_product='.$row['id_product'];
+				
 				$jsReturn .= "storeOnly['".$row['id_product']."']='".$row['store_only']."';";
+				$jsReturn .= "productLink['".$row['id_product']."']='".$link."';";
+				//$jsReturn .= "productLink['".$row['id_product']."']='".$url."';";
 			}
 			
-			$jsReturn .= '</script>';			
+			$jsReturn .= '</script>';
 			return $jsReturn;
+			
 		}
 	}
 	
@@ -121,6 +155,7 @@ class WebdigitStoreOnly extends Module {
 			}			
 			Db::getInstance()->update('product', array('store_only'=>$value), 'id_product = '.$id_product);
 			
+			
 		}else {
 			$id_product = $_GET['id_product'];
 			$sql = 'SELECT store_only FROM '._DB_PREFIX_.'product WHERE id_product = '.$id_product;
@@ -139,6 +174,7 @@ class WebdigitStoreOnly extends Module {
 		$this->smarty->assign (array(
 				'checked' => $checked
 		));
+		
 		return $this->display(__FILE__, 'wdstoreonly.tpl');
 	}	
 }
