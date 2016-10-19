@@ -4,5 +4,7 @@
 		<label>Store Only</label>
 		<input type="checkbox" name="storeOnly" id="storeOnly" value="1" {$checked}/>
 	</div>
-	<input type="submit" name="submitTest" id="submitTest" value="Enregistrer" class="button"/>
+	<div>
+		<button type="submit" name="submitTest" class="btn btn-default pull-left"><i class="process-icon-save"></i>Enregistrer</button>
+	</div>
 </div>

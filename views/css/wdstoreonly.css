@@ -4,6 +4,9 @@
 	border: 1px solid #06b2e6 !important;
 	text-align: center;
 	color: #ffffff !important;
-	font-size: 17px;
+	font-size: 13px;
 	/*border-radius: 10px;*/
+}
+.btn-reserve-slider{
+	background: #2c88c7;	
 }
